@@ -1,0 +1,264 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2513
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica-Bold;\f1\fswiss\fcharset0 Helvetica;\f2\fswiss\fcharset0 Helvetica-Oblique;
+}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b\fs32 \cf0 \ul \ulc0 SUGGESTED SETUP AND STEPS:
+\f1\b0\fs24 \ulnone \
+\
+
+\f2\i \ul Front-end:
+\f1\i0 \ulnone \
+\
+React or Angular for building the user interface components.\
+Redux or MobX for state management.\
+Axios or Fetch for making API calls to the back-end.\
+\
+
+\f2\i \ul Back-end:
+\f1\i0 \ulnone \
+\
+Node.js or Django for building the server-side application.\
+Express or Django REST framework for building APIs.\
+Passport or Django authentication framework for user authentication.\
+Multer or Django Storage for handling file uploads and storage.\
+Web3.js or Ethereum libraries for integrating with web3 wallet and handling cryptocurrencies.\
+Gnosis Safe or Ethereum multisig wallet libraries for implementing multisig treasury functionality.\
+MongoDB or PostgreSQL for database management.\
+\
+Here's a rough outline of the steps to build the application (with AJ answers included underneath):\
+\
+1. Set up the development environment with Node.js or Django, and install the necessary dependencies.\
+	- pretty sure this is done\
+2. Design and implement the user interface using React or Angular, including components for user registration, login, file management, cryptocurrency management, multisig wallet management, and death file management.\
+	- this i\'92m kind of already doing with Visily and Uizard, right? Or maybe I need to do a complete design overhaul so that it corresponds with the server.js file. Maybe I should still with web application first for now and THEN do the mobile version (since ChatGPT is giving me the web application version code apparently)?\
+3. Implement Redux or MobX for state management in the front-end.\
+	- no idea - i\'92ll ask ChatGPT for this\'85 lol\
+4. Implement server-side APIs using Express or Django REST framework for handling user authentication, file uploads, cryptocurrency management, multisig wallet management, and death file management.\
+	- i believe this is in the pseudocode so far?\
+5. Integrate web3.js or Ethereum libraries for connecting and managing the user's web3 wallet and handling cryptocurrencies.\
+	- wagmi, rainbow-kit, ethers.js used for connecting wallet (saw it implemented in another user\'92s project and figured these might be good ones to use - is this too redundant?)\
+6. Integrate Gnosis Safe or Ethereum multisig wallet libraries for implementing multisig treasury functionality.\
+	- not sure if I should still go the multisig route for the MVP or just wait to implement in a later version?\
+7. Set up MongoDB or PostgreSQL for database management, and implement necessary models and database operations for storing user information, files/assets, and death file data.\
+	- i think this was set up already?\
+8. Test the application thoroughly, fixing any bugs or issues.\
+	- TBD\
+9. Deploy the application to a hosting platform of your choice, such as Heroku or AWS, for production use.\
+	- TBD\
+\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+
+\f0\b\fs32 \ul ALAO PSUEDOCODE:
+\f1\b0\fs24 \ulnone \
+\
+// Import required dependencies\
+const express = require('express');\
+const bodyParser = require('body-parser');\
+const cors = require('cors');\
+const multer = require('multer');\
+const passport = require('passport');\
+const LocalStrategy = require('passport-local').Strategy;\
+const mongoose = require('mongoose');\
+\
+// Create an Express web server\
+const app = express();\
+const port = 3000; // Or any other port number you prefer\
+\
+// Middleware for parsing JSON and handling CORS\
+app.use(bodyParser.json());\
+app.use(bodyParser.urlencoded(\{ extended: false \}));\
+app.use(cors());\
+\
+// Configure Multer middleware for file uploads\
+const storage = multer.diskStorage(\{\
+  destination: function (req, file, cb) \{\
+    // Specify the directory where uploaded files will be stored\
+    cb(null, 'uploads/');\
+  \},\
+  filename: function (req, file, cb) \{\
+    // Specify the filename format for uploaded files\
+    cb(null, Date.now() + '-' + file.originalname);\
+  \}\
+\});\
+\
+// Create Multer instance\
+const upload = multer(\{ storage: storage \});\
+\
+// Passport middleware for authentication\
+app.use(passport.initialize());\
+app.use(passport.session());\
+\
+// Passport LocalStrategy configuration\
+passport.use(new LocalStrategy((username, password, done) => \{\
+  // Implement your authentication logic here\
+\}));\
+\
+// Add any additional passport configuration as needed\
+\
+// Connect to MongoDB using Mongoose\
+mongoose.connect('mongodb://localhost/alao_db', \{ useNewUrlParser: true \});\
+\
+// Define the database schema for digital estate information\
+const digitalEstateSchema = new mongoose.Schema(\{\
+  name: \{ type: String, required: true \},\
+  dob: \{ type: Date, required: true \},\
+  assets: \{ type: Array, required: true \},\
+  beneficiaries: \{ type: Array, required: true \},\
+\});\
+\
+// Define a model for the digital estate schema\
+const DigitalEstate = mongoose.model('DigitalEstate', digitalEstateSchema);\
+\
+// Passport configuration\
+passport.use(new LocalStrategy((username, password, done) => \{\
+  // Find a user by username\
+  User.findOne(\{ username \}, (err, user) => \{\
+    if (err) \{ return done(err); \}\
+    if (!user) \{\
+      return done(null, false, \{ message: 'Incorrect username' \});\
+    \}\
+    // Verify password\
+    if (!user.verifyPassword(password)) \{\
+      return done(null, false, \{ message: 'Incorrect password' \});\
+    \}\
+    return done(null, user);\
+  \});\
+\}));\
+\
+// API route for authenticating a user\
+app.post('/api/login', passport.authenticate('local'), (req, res) => \{\
+  // Upon successful authentication, return user information\
+  res.status(200).json(req.user);\
+\});\
+\
+// API route for logging out a user\
+app.post('/api/logout', (req, res) => \{\
+  // Logout the currently authenticated user\
+  req.logout();\
+  res.status(200).json(\{ message: 'Logged out successfully' \});\
+\});\
+\
+// API route for checking if a user is authenticated\
+app.get('/api/check-auth', (req, res) => \{\
+  // Check if a user is authenticated\
+  if (req.isAuthenticated()) \{\
+    return res.status(200).json(\{ authenticated: true, user: req.user \});\
+  \}\
+  res.status(401).json(\{ authenticated: false, user: null \});\
+\});\
+\
+\
+// API route for creating a new digital estate\
+app.post('/api/digital-estates', upload.single('file'), (req, res) => \{\
+  // Extract data from request body\
+  const \{ name, dob, assets, beneficiaries \} = req.body;\
+\
+  // Create a new DigitalEstate document\
+  const newDigitalEstate = new DigitalEstate(\{\
+    name,\
+    dob,\
+    assets,\
+    beneficiaries,\
+    file: req.file\
+  \});\
+\
+  // Save the new digital estate to the database\
+  newDigitalEstate.save()\
+    .then(savedDigitalEstate => \{\
+      res.status(201).json(savedDigitalEstate);\
+    \})\
+    .catch(error => \{\
+      res.status(500).json(\{ error: 'Failed to create digital estate' \});\
+    \});\
+\});\
+\
+// API route for retrieving all digital estates\
+app.get('/api/digital-estates', (req, res) => \{\
+  // Retrieve all DigitalEstate documents from the database\
+  DigitalEstate.find()\
+    .then(digitalEstates => \{\
+      res.status(200).json(digitalEstates);\
+    \})\
+    .catch(error => \{\
+      res.status(500).json(\{ error: 'Failed to retrieve digital estates' \});\
+    \});\
+\});\
+\
+// API route for retrieving a specific digital estate by ID\
+app.get('/api/digital-estates/:id', (req, res) => \{\
+  // Retrieve a specific DigitalEstate document by ID from the database\
+  DigitalEstate.findById(req.params.id)\
+    .then(digitalEstate => \{\
+      if (!digitalEstate) \{\
+        return res.status(404).json(\{ error: 'Digital estate not found' \});\
+      \}\
+      res.status(200).json(digitalEstate);\
+    \})\
+    .catch(error => \{\
+      res.status(500).json(\{ error: 'Failed to retrieve digital estate' \});\
+    \});\
+\});\
+\
+// API route for updating a specific digital estate by ID\
+app.put('/api/digital-estates/:id', (req, res) => \{\
+  // Update a specific DigitalEstate document by ID in the database\
+  DigitalEstate.findByIdAndUpdate(req.params.id, req.body, \{ new: true \})\
+    .then(updatedDigitalEstate => \{\
+      if (!updatedDigitalEstate) \{\
+        return res.status(404).json(\{ error: 'Digital estate not found' \});\
+      \}\
+      res.status(200).json(updatedDigitalEstate);\
+    \})\
+    .catch(error => \{\
+      res.status(500).json(\{ error: 'Failed to update digital estate' \});\
+    \});\
+\});\
+\
+// API route for deleting a specific digital estate by ID\
+app.delete('/api/digital-estates/:id', (req, res) => \{\
+  // Delete a specific DigitalEstate document by ID from the database\
+  DigitalEstate.findByIdAndDelete(req.params.id)\
+    .then(deletedDigitalEstate => \{\
+      if (!deletedDigitalEstate) \{\
+        return res.status(404).json(\{ error: 'Digital estate not found' \});\
+      \}\
+      res.status(200).json(\{ message: 'Digital estate deleted successfully' \});\
+    \})\
+    .catch(error => \{\
+      res.status(500).json(\{ error: 'Failed to delete digital estate' \});\
+    \});\
+\});\
+\
+// Start the server\
+app.listen(PORT, () => \{\
+  console.log(`Server is running on port $\{PORT\}`);\
+\});\
+\
+\
+The code provided is a Node.js application that uses Express as the web framework and Passport for authentication. It also uses Multer for handling file uploads and Mongoose for connecting to a MongoDB database.\
+\
+The code sets up an Express web server listening on a specified port (default is 3000). It then configures middleware for parsing JSON and handling CORS (Cross-Origin Resource Sharing). It also configures Multer middleware for handling file uploads, specifying the destination folder and the filename format for uploaded files.\
+\
+Passport middleware is configured for authentication, with a LocalStrategy for handling username/password authentication logic. Passport is also configured to use a session for maintaining user authentication state.\
+\
+The code defines a MongoDB schema for digital estate information with required fields such as name, date of birth (dob), assets, and beneficiaries. It creates a model for the digital estate schema using Mongoose.\
+\
+It defines several API routes for handling various operations related to digital estates, such as creating a new digital estate with file upload, retrieving all digital estates, retrieving a specific digital estate by ID, updating a specific digital estate by ID, and deleting a specific digital estate by ID.\
+\
+The code also includes error handling for various scenarios, such as handling authentication errors, file upload errors, and database errors. Responses are sent as JSON objects with appropriate status codes and error messages.\
+\
+In summary, the code is a Node.js application that uses Express, Passport, Multer, and Mongoose to provide API routes for managing digital estates, including authentication, file uploads, and CRUD (Create, Read, Update, Delete) operations on digital estates stored in a MongoDB database.\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+
+\f2\i \ul Note
+\f1\i0 \ulnone : I haven\'92t accounted for the wagmi, ethers.js, or rainbow-kit libraries in the above code.\
+\
+Is the way I\'92ve uploaded it to GitHub accurate to how I\'92ve outlined it here? Am I on the right track for this or is this a jumble? Lol.}
